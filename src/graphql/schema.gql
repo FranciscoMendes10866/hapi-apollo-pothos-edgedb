@@ -1,0 +1,12 @@
+type Mutation {
+  createTodo: String!
+}
+
+type Query {
+  currentSession: Session!
+  getTodos: String!
+}
+
+type Session {
+  id: ID!
+}
