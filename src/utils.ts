@@ -1,7 +1,5 @@
-import { createSecretKey } from 'crypto'
-
-import { JWTPayload, SignJWT, jwtVerify } from 'jose'
 import * as z from 'zod'
+import jwt from 'jsonwebtoken'
 import { hash, verify } from 'argon2'
 import { nanoid } from 'nanoid/async'
 import dayjs from 'dayjs'
@@ -10,41 +8,23 @@ import { env } from './env'
 import { Session } from './apollo/builder'
 
 const payloadSchema = z.object({
-  // api session properties
-  sessionId: z.string().uuid(),
-  // jose JWTPayload prorperties
-  iss: z.string().optional(),
-  sub: z.string().optional(),
-  aud: z.union([z.string(), z.string().array()]).optional(),
-  jti: z.string().optional(),
-  nbf: z.number().optional(),
-  exp: z.number().optional(),
-  iat: z.number().optional()
+  sessionId: z.string().uuid()
 })
-
-type AccessTokenPayload = Session & JWTPayload
 
 /**
  * Access Token Utils
  */
 
 export const signAccessToken = async (
-  payload: AccessTokenPayload,
-  userId: string
+  payload: Session
 ): Promise<string> => {
-  const secret = createSecretKey(env.JWT_KEY, 'utf-8')
-  return await new SignJWT(payload)
-    .setProtectedHeader({ alg: 'AES256' })
-    .setSubject(userId)
-    .setIssuedAt()
-    .setExpirationTime(15 * 60) // 15 minutes
-    .setIssuer('koa-pothos')
-    .sign(secret)
+  return jwt.sign(payload, env.JWT_KEY, { expiresIn: 15 * 60 })
 }
 
-export const verifyAccessToken = async (token: string): Promise<AccessTokenPayload> => {
-  const secret = createSecretKey(env.JWT_KEY, 'utf-8')
-  const { payload } = await jwtVerify(token, secret)
+export const verifyAccessToken = async (
+  token: string
+): Promise<Session> => {
+  const payload = jwt.verify(token, env.JWT_KEY)
   return await payloadSchema.parseAsync(payload)
 }
 
@@ -76,6 +56,9 @@ export const hashPassword = async (password: string): Promise<string> => {
   return await hash(password)
 }
 
-export const verifyPassword = async (hash: string, password: string): Promise<boolean> => {
+export const verifyPassword = async (
+  hash: string,
+  password: string
+): Promise<boolean> => {
   return await verify(hash, password)
 }

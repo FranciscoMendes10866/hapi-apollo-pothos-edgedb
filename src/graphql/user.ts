@@ -90,7 +90,7 @@ builder.mutationField('signIn', (t) =>
         throw new ApolloError('Password does not match')
       }
 
-      const accessToken = await signAccessToken({ sessionId: result.id }, result.id)
+      const accessToken = await signAccessToken({ sessionId: result.id })
       const { token, expiresAt } = await createRefreshToken()
 
       const insert = e.insert(e.RefreshToken, {
@@ -114,11 +114,11 @@ builder.mutationField('signIn', (t) =>
 builder.queryField('currentUser', (t) =>
   t.field({
     type: SignUpResponse,
-    args: {
-      userId: t.arg.id({ required: true })
+    authScopes: {
+      isProtected: true
     },
     resolve: async (root, args, ctx) => {
-      const { userId } = args
+      const userId = ctx.currentSession.sessionId
 
       const query = e.select(e.User, (user) => ({
         id: true,
