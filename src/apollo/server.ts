@@ -34,32 +34,23 @@ export const apolloServer: APolloServerFn = ({ httpServer, edgedb }) => {
       ApolloServerPluginLandingPageLocalDefault({ embed: true })
     ],
     context: async ({ ctx }: ApolloServerContextArgs): Promise<Context> => {
-      const baseCtx = {
+      const defaultCtx = {
         ...initContextCache(),
         edgedb,
-        koaCtx: ctx
+        koaCtx: ctx,
+        currentSession: { sessionId: null }
       }
 
       const { authorization } = ctx.headers
-      if (authorization === undefined) {
-        return {
-          ...baseCtx,
-          currentSession: { sessionId: null }
-        }
-      }
+      if (authorization === undefined) return defaultCtx
 
       const isValid = authorization.startsWith('Bearer ')
-      if (!isValid) {
-        return {
-          ...baseCtx,
-          currentSession: { sessionId: null }
-        }
-      }
+      if (!isValid) return defaultCtx
 
       const token = authorization.replace('Bearer', '').trim()
       const decoded = await verifyAccessToken(token)
       return {
-        ...baseCtx,
+        ...defaultCtx,
         currentSession: { sessionId: decoded.sessionId }
       }
     }
