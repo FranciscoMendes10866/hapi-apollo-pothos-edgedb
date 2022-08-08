@@ -17,5 +17,5 @@ and much more, take a look at the `package.json`
 - [X] - Sign in [mutation]
 - [X] - Current user [query]
 - [X] - Authorization layer [shields]
-- [ ] - Sign out [mutation]
-- [ ] - Refresh Token [mutation]
+- [X] - Sign out [mutation]
+- [X] - Refresh Token [mutation]

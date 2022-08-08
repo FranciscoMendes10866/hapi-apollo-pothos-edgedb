@@ -143,6 +143,9 @@ builder.mutationField('refreshToken', (t) =>
     args: {
       refreshToken: t.arg.string({ required: true })
     },
+    authScopes: {
+      isProtected: true
+    },
     resolve: async (root, args, ctx) => {
       const { refreshToken } = args
       const userId = ctx.currentSession.sessionId as string
@@ -190,6 +193,38 @@ builder.mutationField('refreshToken', (t) =>
       }
 
       return { accessToken, refreshToken: token, userId: result.id }
+    }
+  })
+)
+
+const SignOutResponse = builder.simpleObject('SignOutResponse', {
+  fields: (t) => ({
+    message: t.string()
+  })
+})
+
+builder.mutationField('signOut', (t) =>
+  t.field({
+    type: SignOutResponse,
+    args: {
+      refreshToken: t.arg.string({ required: true })
+    },
+    authScopes: {
+      isProtected: true
+    },
+    resolve: async (root, args, ctx) => {
+      const { refreshToken } = args
+
+      const remove = e.delete(e.RefreshToken, (token) => ({
+        filter: e.op(token.token, '=', refreshToken)
+      }))
+      const removeResult = await remove.run(ctx.edgedb)
+
+      if (removeResult === null) {
+        throw new ApolloError('Refresh token could not be removed')
+      }
+
+      return { message: 'Logged out successfully' }
     }
   })
 )
