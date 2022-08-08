@@ -1,4 +1,5 @@
 import SchemaBuilder from '@pothos/core'
+import SimpleObjectsPlugin from '@pothos/plugin-simple-objects'
 import { Client as DatabaseClient } from 'edgedb'
 
 export class Session {
@@ -17,7 +18,9 @@ export interface Context {
   edgedb: DatabaseClient
 }
 
-const builder = new SchemaBuilder<Root<Context>>({})
+const builder = new SchemaBuilder<Root<Context>>({
+  plugins: [SimpleObjectsPlugin]
+})
 
 builder.queryType({})
 builder.mutationType({})

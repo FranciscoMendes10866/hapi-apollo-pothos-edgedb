@@ -6,8 +6,7 @@ import { printSchema, lexicographicSortSchema } from 'graphql'
 import { builder } from './builder'
 import { env } from '../env'
 
-import '../graphql/todos'
-import '../graphql/session'
+import '../graphql/user'
 
 export const schema = builder.toSchema({})
 

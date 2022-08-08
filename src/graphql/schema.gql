@@ -1,12 +1,24 @@
 type Mutation {
-  createTodo: String!
+  signIn(input: UserInput!): SignInResponse!
+  signUp(input: UserInput!): SignUpResponse!
 }
 
 type Query {
-  currentSession: Session!
-  getTodos: String!
+  currentUser(userId: ID!): SignUpResponse!
 }
 
-type Session {
+type SignInResponse {
+  accessToken: String!
+  refreshToken: String!
+  userId: String!
+}
+
+type SignUpResponse {
   id: ID!
+  username: String!
+}
+
+input UserInput {
+  password: String!
+  username: String!
 }
