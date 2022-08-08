@@ -1,6 +1,7 @@
 type Mutation {
   refreshToken(refreshToken: String!): SignInResponse!
   signIn(input: UserInput!): SignInResponse!
+  signOut(refreshToken: String!): SignOutResponse!
   signUp(input: UserInput!): SignUpResponse!
 }
 
@@ -12,6 +13,10 @@ type SignInResponse {
   accessToken: String!
   refreshToken: String!
   userId: String!
+}
+
+type SignOutResponse {
+  message: String!
 }
 
 type SignUpResponse {
