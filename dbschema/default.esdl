@@ -7,8 +7,12 @@ module default {
     }
 
     type RefreshToken {
-        required property token -> str;
+        required property token -> str {
+            constraint exclusive;
+        };
         required property expiresAt -> int64;
-        required link user -> User;
+        required multi link user -> User {
+            constraint exclusive;
+        };
     }
 }
