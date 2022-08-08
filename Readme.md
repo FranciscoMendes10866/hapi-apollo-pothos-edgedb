@@ -4,7 +4,7 @@
 - [Apollo Server](https://www.apollographql.com/docs/apollo-server) - graphql server
 - [Pothos](https://github.com/hayes/pothos) - code-first graphql schemas
 - [ts-standard](https://github.com/standard/ts-standard) - linter and formatter
-- [jose](https://github.com/panva/jose) - json web token
+- [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) - json web token
 - [argon2](https://github.com/ranisalt/node-argon2) - (password) hashing
 - [zod](https://github.com/colinhacks/zod) - schema validation
 - [EdgeDB](https://github.com/edgedb/edgedb) - database
@@ -20,4 +20,5 @@ and much more, take a look at the `package.json`
 - [X] - Sign out [mutation]
 - [X] - Refresh Token [mutation]
 - [ ] - All queries and mutations should have their args validated with zod [validation]
+- [ ] - Install some more dependencies (cors, helmet, armour) [validation]
 
