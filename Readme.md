@@ -10,3 +10,12 @@
 - [EdgeDB](https://github.com/edgedb/edgedb) - database
 
 and much more, take a look at the `package.json`
+
+## Todo
+
+- [X] - Sign up [mutation]
+- [X] - Sign in [mutation]
+- [X] - Current user [query]
+- [X] - Authorization layer [shields]
+- [ ] - Sign out [mutation]
+- [ ] - Refresh Token [mutation]
