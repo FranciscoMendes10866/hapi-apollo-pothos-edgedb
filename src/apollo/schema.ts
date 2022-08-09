@@ -10,8 +10,7 @@ import '../graphql/user'
 
 export const schema = builder.toSchema({})
 
-const schemaAsString = printSchema(lexicographicSortSchema(schema))
-
 if (!env.isProduction && !env.isTest) {
+  const schemaAsString = printSchema(lexicographicSortSchema(schema))
   fs.writeFileSync(path.join(process.cwd(), './src/graphql/schema.gql'), schemaAsString)
 }

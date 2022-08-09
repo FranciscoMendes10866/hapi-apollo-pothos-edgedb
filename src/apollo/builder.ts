@@ -3,7 +3,7 @@ import SimpleObjectsPlugin from '@pothos/plugin-simple-objects'
 import ScopeAuthPlugin from '@pothos/plugin-scope-auth'
 import ValidationPlugin from '@pothos/plugin-validation'
 import { Client as DatabaseClient } from 'edgedb'
-import { Context as KoaContext } from 'koa'
+import { Request } from '@hapi/hapi'
 
 export class Session {
   sessionId: string | null = null
@@ -20,7 +20,7 @@ interface Root<T, A> {
 export interface Context {
   currentSession: Session
   edgedb: DatabaseClient
-  koaCtx: KoaContext
+  req: Request
 }
 
 interface AuthScopes {

@@ -1,34 +1,23 @@
-import http from 'http'
-
-import Koa from 'koa'
-import cors from '@koa/cors'
-import helmet from 'koa-helmet'
+import Hapi from '@hapi/hapi'
 import * as edgedb from 'edgedb'
 
 import { apolloServer } from './apollo/server'
 import { env } from './env'
 
-type BoostrapFn = () => void
+type BoostrapFn = () => Promise<Hapi.Server>
 
-const bootstrap: BoostrapFn = async () => {
-  const httpServer = http.createServer()
+export const bootstrap: BoostrapFn = async () => {
+  const app = Hapi.server({ port: env.PORT, routes: { cors: true } })
   const client = edgedb.createClient({ port: 5656, tlsSecurity: 'insecure' })
-  const app = new Koa()
 
-  app.use(cors())
-  app.use(helmet())
-
-  const server = apolloServer({ httpServer, edgedb: client })
+  const server = apolloServer({ hapiServer: app, edgedb: client })
   await server.start()
-  server.applyMiddleware({ app })
+  await server.applyMiddleware({ app })
 
-  httpServer.on('request', app.callback())
-
-  await new Promise<void>((resolve) =>
-    httpServer.listen({ port: env.PORT }, resolve)
-  )
-
-  console.log(`Server ready at http://localhost:4000${server.graphqlPath}`)
+  return app
 }
 
-void bootstrap()
+void bootstrap().then(async (app) => {
+  await app.start()
+  console.log('Server ready at http://localhost:4000/graphql')
+}).catch(console.error)

@@ -1,6 +1,6 @@
 ## Tech Stack
 
-- [Koa](https://github.com/koajs/koa) - http router
+- [hapi](https://github.com/hapijs/hapi) - http router
 - [Apollo Server](https://www.apollographql.com/docs/apollo-server) - graphql server
 - [Pothos](https://github.com/hayes/pothos) - code-first graphql schemas
 - [ts-standard](https://github.com/standard/ts-standard) - linter and formatter
@@ -21,5 +21,5 @@ and much more, take a look at the `package.json`
 - [X] - Sign out [mutation]
 - [X] - Refresh Token [mutation]
 - [X] - All queries and mutations should have their args validated with zod [validation]
-- [X] - Install some more dependencies (cors and helmet) [api_protection]
+- [X] - Add cors protection [api_protection]
 - [ ] - Behaviour testing by using vitest and supertest (mock db) [testing]
