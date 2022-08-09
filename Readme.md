@@ -8,6 +8,7 @@
 - [argon2](https://github.com/ranisalt/node-argon2) - (password) hashing
 - [zod](https://github.com/colinhacks/zod) - schema validation
 - [EdgeDB](https://github.com/edgedb/edgedb) - database
+- [Vitest](https://github.com/vitest-dev/vitest) - test runner
 
 and much more, take a look at the `package.json`
 
