@@ -25,6 +25,7 @@
     "@pothos/core": "^3.13.0",
     "@pothos/plugin-scope-auth": "^3.11.0",
     "@pothos/plugin-simple-objects": "^3.4.0",
+    "@pothos/plugin-validation": "^3.5.1",
     "apollo-server-core": "^3.10.0",
     "apollo-server-koa": "^3.10.0",
     "argon2": "^0.28.7",

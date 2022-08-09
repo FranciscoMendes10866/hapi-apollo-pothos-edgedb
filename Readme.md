@@ -19,6 +19,6 @@ and much more, take a look at the `package.json`
 - [X] - Authorization layer [shields]
 - [X] - Sign out [mutation]
 - [X] - Refresh Token [mutation]
-- [ ] - All queries and mutations should have their args validated with zod [validation]
+- [X] - All queries and mutations should have their args validated with zod [validation]
 - [ ] - Install some more dependencies (cors, helmet, armour) [validation]
 

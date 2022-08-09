@@ -1,4 +1,5 @@
 import { ApolloError } from 'apollo-server-core'
+import * as z from 'zod'
 
 import { builder } from '../apollo/builder'
 import e from '../db'
@@ -18,11 +19,22 @@ const UserInput = builder.inputType('UserInput', {
   })
 })
 
+const authSchema = z.object({
+  username: z.string().min(6).max(24),
+  password: z.string().min(8).max(24)
+})
+
 builder.mutationField('signUp', (t) =>
   t.field({
     type: SignUpResponse,
     args: {
-      input: t.arg({ type: UserInput, required: true })
+      input: t.arg({
+        type: UserInput,
+        required: true,
+        validate: {
+          schema: authSchema
+        }
+      })
     },
     resolve: async (root, args, ctx) => {
       const { username, password } = args.input
@@ -68,7 +80,13 @@ builder.mutationField('signIn', (t) =>
   t.field({
     type: SignInResponse,
     args: {
-      input: t.arg({ type: UserInput, required: true })
+      input: t.arg({
+        type: UserInput,
+        required: true,
+        validate: {
+          schema: authSchema
+        }
+      })
     },
     resolve: async (root, args, ctx) => {
       const { username, password } = args.input
@@ -141,7 +159,12 @@ builder.mutationField('refreshToken', (t) =>
   t.field({
     type: SignInResponse,
     args: {
-      refreshToken: t.arg.string({ required: true })
+      refreshToken: t.arg.string({
+        required: true,
+        validate: {
+          schema: z.string().min(21)
+        }
+      })
     },
     authScopes: {
       isProtected: true
@@ -207,7 +230,12 @@ builder.mutationField('signOut', (t) =>
   t.field({
     type: SignOutResponse,
     args: {
-      refreshToken: t.arg.string({ required: true })
+      refreshToken: t.arg.string({
+        required: true,
+        validate: {
+          schema: z.string().min(21)
+        }
+      })
     },
     authScopes: {
       isProtected: true

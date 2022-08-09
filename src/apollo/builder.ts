@@ -1,6 +1,7 @@
 import SchemaBuilder from '@pothos/core'
 import SimpleObjectsPlugin from '@pothos/plugin-simple-objects'
 import ScopeAuthPlugin from '@pothos/plugin-scope-auth'
+import ValidationPlugin from '@pothos/plugin-validation'
 import { Client as DatabaseClient } from 'edgedb'
 import { Context as KoaContext } from 'koa'
 
@@ -27,7 +28,7 @@ interface AuthScopes {
 }
 
 const builder = new SchemaBuilder<Root<Context, AuthScopes>>({
-  plugins: [ScopeAuthPlugin, SimpleObjectsPlugin],
+  plugins: [SimpleObjectsPlugin, ScopeAuthPlugin, ValidationPlugin],
   authScopes: async (context) => ({
     isProtected: context.currentSession?.sessionId !== null
   })
