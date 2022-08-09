@@ -13,6 +13,7 @@ and much more, take a look at the `package.json`
 
 ## Todo
 
+- [X] - Create database schema [db_schema]
 - [X] - Sign up [mutation]
 - [X] - Sign in [mutation]
 - [X] - Current user [query]
@@ -20,5 +21,5 @@ and much more, take a look at the `package.json`
 - [X] - Sign out [mutation]
 - [X] - Refresh Token [mutation]
 - [X] - All queries and mutations should have their args validated with zod [validation]
-- [ ] - Install some more dependencies (cors, helmet, armour) [validation]
-
+- [X] - Install some more dependencies (cors and helmet) [api_protection]
+- [ ] - Behaviour testing by using vitest and supertest (mock db) [testing]

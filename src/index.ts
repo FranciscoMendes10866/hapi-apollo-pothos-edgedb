@@ -1,6 +1,8 @@
 import http from 'http'
 
 import Koa from 'koa'
+import cors from '@koa/cors'
+import helmet from 'koa-helmet'
 import * as edgedb from 'edgedb'
 
 import { apolloServer } from './apollo/server'
@@ -10,8 +12,11 @@ type BoostrapFn = () => void
 
 const bootstrap: BoostrapFn = async () => {
   const httpServer = http.createServer()
-  const app = new Koa()
   const client = edgedb.createClient({ port: 5656, tlsSecurity: 'insecure' })
+  const app = new Koa()
+
+  app.use(cors())
+  app.use(helmet())
 
   const server = apolloServer({ httpServer, edgedb: client })
   await server.start()
