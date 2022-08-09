@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import supertest from 'supertest'
+import { Server } from 'http'
 
 import { bootstrap } from '../index'
-import { Server } from 'http'
 
 describe('Sign Up Mutation Suite', () => {
   let server: Server
