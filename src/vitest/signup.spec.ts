@@ -2,13 +2,13 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import supertest from 'supertest'
 import { Server } from 'http'
 
-import { bootstrap } from '../index'
+import { startServer } from '../index'
 
 describe('Sign Up Mutation Suite', () => {
   let server: Server
 
   beforeAll(async () => {
-    server = (await bootstrap()).listener
+    server = (await startServer()).listener
   })
 
   afterAll(() => {
@@ -23,7 +23,7 @@ describe('Sign Up Mutation Suite', () => {
         query: `
         mutation {
           signUp(input: {
-            username: "mauricio",
+            username: "danny",
             password: "Hello123"
           }) {
             id
@@ -33,6 +33,6 @@ describe('Sign Up Mutation Suite', () => {
         `
       })
     expect(res.status).toBe(200)
-    expect(res.body.data.signUp.username).toEqual('mauricio')
+    expect(res.body.data.signUp.username).toEqual('danny')
   })
 })

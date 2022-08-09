@@ -20,7 +20,7 @@ const UserInput = builder.inputType('UserInput', {
 })
 
 const authSchema = z.object({
-  username: z.string().min(6).max(24),
+  username: z.string().min(2).max(24),
   password: z.string().min(8).max(24)
 })
 
