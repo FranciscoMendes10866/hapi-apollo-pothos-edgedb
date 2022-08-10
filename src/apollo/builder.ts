@@ -5,6 +5,9 @@ import ValidationPlugin from '@pothos/plugin-validation'
 import { Client as DatabaseClient } from 'edgedb'
 import { Request } from '@hapi/hapi'
 
+import { Services } from '../index'
+import { Utils } from './server'
+
 export class Session {
   sessionId: string | null = null
   constructor (id: string) {
@@ -21,6 +24,8 @@ export interface Context {
   currentSession: Session
   edgedb: DatabaseClient
   req: Request
+  services: Services
+  utils: Utils
 }
 
 interface AuthScopes {

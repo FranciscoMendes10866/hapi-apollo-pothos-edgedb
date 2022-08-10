@@ -2,8 +2,6 @@ import { ApolloError } from 'apollo-server-core'
 import * as z from 'zod'
 
 import { builder } from '../apollo/builder'
-import e from '../db'
-import { hashPassword, verifyPassword, createRefreshToken, signAccessToken, isRefreshTokenExpired } from '../utils'
 
 const SignUpResponse = builder.simpleObject('SignUpResponse', {
   fields: (t) => ({
@@ -39,26 +37,14 @@ builder.mutationField('signUp', (t) =>
     resolve: async (root, args, ctx) => {
       const { username, password } = args.input
 
-      const query = e.select(e.User, (user) => ({
-        id: true,
-        username: true,
-        password: true,
-        filter: e.op(user.username, '=', username)
-      }))
-      const result = await query.run(ctx.edgedb)
-
+      const result = await ctx.services.findUserByUsername(username, ctx.edgedb)
       if (result !== null) {
         throw new ApolloError('User alteady exists')
       }
 
-      const hashedPassword = await hashPassword(password)
+      const hashedPassword = await ctx.utils.hashPassword(password)
 
-      const insert = e.insert(e.User, {
-        username,
-        password: hashedPassword
-      })
-      const insertionResult = await insert.run(ctx.edgedb)
-
+      const insertionResult = await ctx.services.insertUser(username, hashedPassword, ctx.edgedb)
       if (insertionResult === null) {
         throw new ApolloError('User account was not created')
       }
@@ -91,35 +77,20 @@ builder.mutationField('signIn', (t) =>
     resolve: async (root, args, ctx) => {
       const { username, password } = args.input
 
-      const query = e.select(e.User, (user) => ({
-        id: true,
-        username: true,
-        password: true,
-        filter: e.op(user.username, '=', username)
-      }))
-      const result = await query.run(ctx.edgedb)
-
+      const result = await ctx.services.findUserByUsername(username, ctx.edgedb)
       if (result === null) {
         throw new ApolloError('An error happen when fetching the user')
       }
 
-      const isValid = await verifyPassword(result.password, password)
+      const isValid = await ctx.utils.verifyPassword(result.password, password)
       if (!isValid) {
         throw new ApolloError('Password does not match')
       }
 
-      const accessToken = await signAccessToken({ sessionId: result.id })
-      const { token, expiresAt } = await createRefreshToken()
+      const accessToken = await ctx.utils.signAccessToken({ sessionId: result.id })
+      const { token, expiresAt } = await ctx.utils.createRefreshToken()
 
-      const insert = e.insert(e.RefreshToken, {
-        token,
-        expiresAt,
-        user: e.select(e.User, (user) => ({
-          filter: e.op(user.username, '=', username)
-        }))
-      })
-      const insertionResult = await insert.run(ctx.edgedb)
-
+      const insertionResult = await ctx.services.insertRefreshToken(result.id, token, expiresAt, ctx.edgedb)
       if (insertionResult === null) {
         throw new ApolloError('User account was not created')
       }
@@ -136,16 +107,9 @@ builder.queryField('currentUser', (t) =>
       isProtected: true
     },
     resolve: async (root, args, ctx) => {
-      const userId = ctx.currentSession.sessionId
+      const userId = ctx.currentSession.sessionId as string
 
-      const query = e.select(e.User, (user) => ({
-        id: true,
-        username: true,
-        password: true,
-        filter: e.op(user.id, '=', e.uuid(userId as string))
-      }))
-      const result = await query.run(ctx.edgedb)
-
+      const result = await ctx.services.findUserById(userId, ctx.edgedb)
       if (result === null) {
         throw new ApolloError('An error happen when fetching the user')
       }
@@ -173,44 +137,25 @@ builder.mutationField('refreshToken', (t) =>
       const { refreshToken } = args
       const userId = ctx.currentSession.sessionId as string
 
-      const query = e.select(e.RefreshToken, (token) => ({
-        id: true,
-        expiresAt: true,
-        token: true,
-        filter: e.op(token.token, '=', refreshToken)
-      }))
-      const result = await query.run(ctx.edgedb)
-
+      const result = await ctx.services.findRefreshToken(refreshToken, ctx.edgedb)
       if (result === null) {
         throw new ApolloError('Refresh token not found')
       }
 
-      const hasExpired = isRefreshTokenExpired(result.expiresAt)
+      const hasExpired = ctx.utils.isRefreshTokenExpired(result.expiresAt)
       if (hasExpired) {
         throw new ApolloError('Refresh token expired')
       }
 
-      const remove = e.delete(e.RefreshToken, (token) => ({
-        filter: e.op(token.token, '=', refreshToken)
-      }))
-      const removeResult = await remove.run(ctx.edgedb)
-
+      const removeResult = await ctx.services.deleteRefreshToken(refreshToken, ctx.edgedb)
       if (removeResult === null) {
         throw new ApolloError('Refresh token could not be removed')
       }
 
-      const accessToken = await signAccessToken({ sessionId: userId })
-      const { token, expiresAt } = await createRefreshToken()
+      const accessToken = await ctx.utils.signAccessToken({ sessionId: userId })
+      const { token, expiresAt } = await ctx.utils.createRefreshToken()
 
-      const insert = e.insert(e.RefreshToken, {
-        token,
-        expiresAt,
-        user: e.select(e.User, (user) => ({
-          filter: e.op(user.id, '=', e.uuid(userId))
-        }))
-      })
-      const insertionResult = await insert.run(ctx.edgedb)
-
+      const insertionResult = await ctx.services.insertRefreshToken(userId, token, expiresAt, ctx.edgedb)
       if (insertionResult === null) {
         throw new ApolloError('User account was not created')
       }
@@ -243,11 +188,7 @@ builder.mutationField('signOut', (t) =>
     resolve: async (root, args, ctx) => {
       const { refreshToken } = args
 
-      const remove = e.delete(e.RefreshToken, (token) => ({
-        filter: e.op(token.token, '=', refreshToken)
-      }))
-      const removeResult = await remove.run(ctx.edgedb)
-
+      const removeResult = await ctx.services.deleteRefreshToken(refreshToken, ctx.edgedb)
       if (removeResult === null) {
         throw new ApolloError('Refresh token could not be removed')
       }
