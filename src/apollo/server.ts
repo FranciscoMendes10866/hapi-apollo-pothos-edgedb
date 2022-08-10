@@ -6,7 +6,6 @@ import {
   ApolloServerPluginLandingPageLocalDefault
 } from 'apollo-server-core'
 import { initContextCache } from '@pothos/core'
-import { Client as DatabaseClient } from 'edgedb'
 import { Server, Request } from '@hapi/hapi'
 
 import { schema } from './schema'
@@ -14,11 +13,8 @@ import { Context } from './builder'
 import { Services } from '../index'
 import * as utils from '../utils'
 
-export type Utils = typeof utils
-
 interface ApolloServerProps {
   hapiServer: Server
-  edgedb: DatabaseClient
   services: Services
 }
 
@@ -28,7 +24,7 @@ interface ApolloServerContextArgs {
 
 type APolloServerFn = (args: ApolloServerProps) => ApolloServer
 
-export const apolloServer: APolloServerFn = ({ hapiServer, edgedb, services }) => {
+export const apolloServer: APolloServerFn = ({ hapiServer, services }) => {
   return new ApolloServer({
     schema,
     csrfPrevention: true,
@@ -40,11 +36,9 @@ export const apolloServer: APolloServerFn = ({ hapiServer, edgedb, services }) =
     context: async ({ request }: ApolloServerContextArgs): Promise<Context> => {
       const defaultCtx = {
         ...initContextCache(),
-        edgedb,
         req: request,
         currentSession: { sessionId: null },
-        services,
-        utils
+        services
       }
 
       const { authorization } = request.headers

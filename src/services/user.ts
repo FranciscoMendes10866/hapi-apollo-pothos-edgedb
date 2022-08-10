@@ -1,6 +1,5 @@
-import { Client as DatabaseClient } from 'edgedb'
-
 import e from '../db'
+import { edgedb } from '../edgedb'
 
 interface GetUserByUsernameResult {
   id: string
@@ -8,29 +7,29 @@ interface GetUserByUsernameResult {
   password: string
 }
 
-export const findUserByUsername = async (username: string, db: DatabaseClient): Promise<GetUserByUsernameResult | null> => {
+export const findUserByUsername = async (username: string): Promise<GetUserByUsernameResult | null> => {
   const query = e.select(e.User, (user) => ({
     id: true,
     username: true,
     password: true,
     filter: e.op(user.username, '=', username)
   }))
-  return await query.run(db)
+  return await query.run(edgedb)
 }
 
 interface InsertionResult {
   id: string
 }
 
-export const insertUser = async (username: string, password: string, db: DatabaseClient): Promise<InsertionResult | null> => {
+export const insertUser = async (username: string, password: string): Promise<InsertionResult | null> => {
   const insert = e.insert(e.User, {
     username,
     password
   })
-  return await insert.run(db)
+  return await insert.run(edgedb)
 }
 
-export const insertRefreshToken = async (userId: string, token: string, expiresAt: number, db: DatabaseClient): Promise<InsertionResult | null> => {
+export const insertRefreshToken = async (userId: string, token: string, expiresAt: number): Promise<InsertionResult | null> => {
   const insert = e.insert(e.RefreshToken, {
     token,
     expiresAt,
@@ -38,17 +37,17 @@ export const insertRefreshToken = async (userId: string, token: string, expiresA
       filter: e.op(user.id, '=', e.uuid(userId))
     }))
   })
-  return await insert.run(db)
+  return await insert.run(edgedb)
 }
 
-export const findUserById = async (userId: string, db: DatabaseClient): Promise<GetUserByUsernameResult | null> => {
+export const findUserById = async (userId: string): Promise<GetUserByUsernameResult | null> => {
   const query = e.select(e.User, (user) => ({
     id: true,
     username: true,
     password: true,
     filter: e.op(user.id, '=', e.uuid(userId))
   }))
-  return await query.run(db)
+  return await query.run(edgedb)
 }
 
 interface GetRefreshTokenResult {
@@ -57,19 +56,19 @@ interface GetRefreshTokenResult {
   expiresAt: number
 }
 
-export const findRefreshToken = async (refreshToken: string, db: DatabaseClient): Promise<GetRefreshTokenResult | null> => {
+export const findRefreshToken = async (refreshToken: string): Promise<GetRefreshTokenResult | null> => {
   const query = e.select(e.RefreshToken, (token) => ({
     id: true,
     expiresAt: true,
     token: true,
     filter: e.op(token.token, '=', refreshToken)
   }))
-  return await query.run(db)
+  return await query.run(edgedb)
 }
 
-export const deleteRefreshToken = async (refreshToken: string, db: DatabaseClient): Promise<InsertionResult | null> => {
+export const deleteRefreshToken = async (refreshToken: string): Promise<InsertionResult | null> => {
   const remove = e.delete(e.RefreshToken, (token) => ({
     filter: e.op(token.token, '=', refreshToken)
   }))
-  return await remove.run(db)
+  return await remove.run(edgedb)
 }

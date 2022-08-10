@@ -2,6 +2,7 @@ import { ApolloError } from 'apollo-server-core'
 import * as z from 'zod'
 
 import { builder } from '../apollo/builder'
+import * as utils from '../utils'
 
 const SignUpResponse = builder.simpleObject('SignUpResponse', {
   fields: (t) => ({
@@ -37,14 +38,14 @@ builder.mutationField('signUp', (t) =>
     resolve: async (root, args, ctx) => {
       const { username, password } = args.input
 
-      const result = await ctx.services.findUserByUsername(username, ctx.edgedb)
+      const result = await ctx.services.findUserByUsername(username)
       if (result !== null) {
         throw new ApolloError('User alteady exists')
       }
 
-      const hashedPassword = await ctx.utils.hashPassword(password)
+      const hashedPassword = await utils.hashPassword(password)
 
-      const insertionResult = await ctx.services.insertUser(username, hashedPassword, ctx.edgedb)
+      const insertionResult = await ctx.services.insertUser(username, hashedPassword)
       if (insertionResult === null) {
         throw new ApolloError('User account was not created')
       }
@@ -77,20 +78,20 @@ builder.mutationField('signIn', (t) =>
     resolve: async (root, args, ctx) => {
       const { username, password } = args.input
 
-      const result = await ctx.services.findUserByUsername(username, ctx.edgedb)
+      const result = await ctx.services.findUserByUsername(username)
       if (result === null) {
         throw new ApolloError('An error happen when fetching the user')
       }
 
-      const isValid = await ctx.utils.verifyPassword(result.password, password)
+      const isValid = await utils.verifyPassword(result.password, password)
       if (!isValid) {
         throw new ApolloError('Password does not match')
       }
 
-      const accessToken = await ctx.utils.signAccessToken({ sessionId: result.id })
-      const { token, expiresAt } = await ctx.utils.createRefreshToken()
+      const accessToken = await utils.signAccessToken({ sessionId: result.id })
+      const { token, expiresAt } = await utils.createRefreshToken()
 
-      const insertionResult = await ctx.services.insertRefreshToken(result.id, token, expiresAt, ctx.edgedb)
+      const insertionResult = await ctx.services.insertRefreshToken(result.id, token, expiresAt)
       if (insertionResult === null) {
         throw new ApolloError('User account was not created')
       }
@@ -109,7 +110,7 @@ builder.queryField('currentUser', (t) =>
     resolve: async (root, args, ctx) => {
       const userId = ctx.currentSession.sessionId as string
 
-      const result = await ctx.services.findUserById(userId, ctx.edgedb)
+      const result = await ctx.services.findUserById(userId)
       if (result === null) {
         throw new ApolloError('An error happen when fetching the user')
       }
@@ -137,25 +138,25 @@ builder.mutationField('refreshToken', (t) =>
       const { refreshToken } = args
       const userId = ctx.currentSession.sessionId as string
 
-      const result = await ctx.services.findRefreshToken(refreshToken, ctx.edgedb)
+      const result = await ctx.services.findRefreshToken(refreshToken)
       if (result === null) {
         throw new ApolloError('Refresh token not found')
       }
 
-      const hasExpired = ctx.utils.isRefreshTokenExpired(result.expiresAt)
+      const hasExpired = utils.isRefreshTokenExpired(result.expiresAt)
       if (hasExpired) {
         throw new ApolloError('Refresh token expired')
       }
 
-      const removeResult = await ctx.services.deleteRefreshToken(refreshToken, ctx.edgedb)
+      const removeResult = await ctx.services.deleteRefreshToken(refreshToken)
       if (removeResult === null) {
         throw new ApolloError('Refresh token could not be removed')
       }
 
-      const accessToken = await ctx.utils.signAccessToken({ sessionId: userId })
-      const { token, expiresAt } = await ctx.utils.createRefreshToken()
+      const accessToken = await utils.signAccessToken({ sessionId: userId })
+      const { token, expiresAt } = await utils.createRefreshToken()
 
-      const insertionResult = await ctx.services.insertRefreshToken(userId, token, expiresAt, ctx.edgedb)
+      const insertionResult = await ctx.services.insertRefreshToken(userId, token, expiresAt)
       if (insertionResult === null) {
         throw new ApolloError('User account was not created')
       }
@@ -188,7 +189,7 @@ builder.mutationField('signOut', (t) =>
     resolve: async (root, args, ctx) => {
       const { refreshToken } = args
 
-      const removeResult = await ctx.services.deleteRefreshToken(refreshToken, ctx.edgedb)
+      const removeResult = await ctx.services.deleteRefreshToken(refreshToken)
       if (removeResult === null) {
         throw new ApolloError('Refresh token could not be removed')
       }
